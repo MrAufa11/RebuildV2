@@ -1,0 +1,140 @@
+# ============================================
+# GITHUB ACTIONS CI/CD WORKFLOW
+# ============================================
+# Auto build and deploy to production (main branch)
+# when code is pushed/merged to dev branch
+# ============================================
+
+name: Build and Deploy to Production
+
+on:
+  push:
+    branches:
+      - dev
+  pull_request:
+    branches:
+      - main
+    types: [closed]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
+    
+    steps:
+      # 1. Checkout code from dev branch
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+      
+      # 2. Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      # 3. Install Backend Dependencies
+      - name: Install Backend Dependencies
+        run: |
+          cd backend
+          npm ci
+      
+      # 4. Build SPMB Frontend
+      - name: Build SPMB Frontend
+        run: |
+          cd spmb/frontend
+          npm ci
+          npm run build
+          echo "SPMB build completed"
+          ls -la dist/
+      
+      # 5. Build Website Frontend
+      - name: Build Website Frontend
+        run: |
+          cd website/frontend
+          npm ci
+          npm run build
+          echo "Website build completed"
+          ls -la dist/
+      
+      # 6. Prepare Production Build
+      - name: Prepare Production Build
+        run: |
+          # Create production directory structure
+          mkdir -p prod-build
+          
+          # Copy backend (without node_modules)
+          rsync -av --exclude='node_modules' \
+                       --exclude='.env' \
+                       --exclude='uploads' \
+                       backend/ prod-build/backend/
+          
+          # Copy built SPMB frontend
+          cp -r spmb/frontend/dist prod-build/spmb/
+          
+          # Copy built Website frontend
+          cp -r website/frontend/dist prod-build/website/
+          
+          # Copy public assets
+          cp -r public prod-build/
+          
+          # Copy Docker files
+          cp docker-compose.yml prod-build/
+          cp -r docker prod-build/
+          
+          # Copy essential files
+          cp .gitignore prod-build/
+          cp README.md prod-build/ 2>/dev/null || true
+          
+          echo "Production build structure:"
+          find prod-build -type f | head -30
+      
+      # 7. Deploy to main branch (production)
+      - name: Deploy to Production (main branch)
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./prod-build
+          publish_branch: main
+          force_orphan: false
+          full_commit_message: '🚀 Production build: ${{ github.sha }}'
+      
+      # 8. Create Release (Optional)
+      - name: Create Release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ github.run_number }}
+          release_name: Release v${{ github.run_number }}
+          body: |
+            ## Automated Release
+            
+            **Build Information:**
+            - Commit: ${{ github.sha }}
+            - Branch: ${{ github.ref }}
+            - Build Time: ${{ github.event.head_commit.timestamp }}
+            
+            **Changes:**
+            ${{ github.event.head_commit.message }}
+          draft: false
+          prerelease: false
+        continue-on-error: true
+      
+      # 9. Notify Success
+      - name: Deployment Success
+        run: |
+          echo "✅ Build and Deploy Successful!"
+          echo ""
+          echo "📦 Production build deployed to main branch"
+          echo "🔗 Commit: ${{ github.sha }}"
+          echo "📅 Time: $(date -u)"
+          echo ""
+          echo "Next steps:"
+          echo "1. Pull main branch on production server"
+          echo "2. Run: docker-compose up -d"
+          echo "3. Verify deployment"

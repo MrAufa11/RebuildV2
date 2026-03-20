@@ -1,0 +1,109 @@
+version: '3.8'
+
+services:
+  # === DATABASE (Single Instance) ===
+  db:
+    image: mysql:8.0
+    container_name: database
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./docker/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+
+  # === BACKEND ===
+  # Centralized Backend
+  backend:
+    build: backend
+    container_name: central-backend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+      - ./public:/public
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      
+      # Database Connections (All point to same host 'db')
+      # Default connection
+      - DB_HOST=db
+      - DB_USER=root
+      - DB_PASS=root
+      - DB_NAME=rebuild_v2
+      
+      # Specific Connections
+      - DB_MASTER_HOST=db
+      - DB_MASTER_USER=root
+      - DB_MASTER_PASS=root
+      - DB_MASTER_NAME=master_db
+      
+      - DB_WEBSITE_HOST=db
+      - DB_WEBSITE_USER=root
+      - DB_WEBSITE_PASS=root
+      - DB_WEBSITE_NAME=rebuild_v2
+      
+      - DB_SPMB_HOST=db
+      - DB_SPMB_USER=root
+      - DB_SPMB_PASS=root
+      - DB_SPMB_NAME=spmb
+      
+      - DB_KEUANGAN_HOST=db
+      - DB_KEUANGAN_USER=root
+      - DB_KEUANGAN_PASS=root
+      - DB_KEUANGAN_NAME=keuangan_db
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - app-network
+
+  # === FRONTENDS ===
+  
+  website-frontend:
+    build: website/frontend
+    container_name: website-frontend
+    ports:
+      - "5173:3000"
+    volumes:
+      - ./website/frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=/api
+      - VITE_PROXY_TARGET=http://backend:3000
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  spmb-frontend:
+    build: spmb/frontend
+    container_name: spmb-frontend
+    ports:
+      - "5174:3000"
+    volumes:
+      - ./spmb/frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=/api
+      - VITE_PROXY_TARGET=http://backend:3000
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+volumes:
+  db_data:
+
+networks:
+  app-network:
+    driver: bridge

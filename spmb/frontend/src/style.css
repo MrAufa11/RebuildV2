@@ -1,0 +1,173 @@
+@import "tailwindcss";
+@variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --color-brand-green: #059669;
+  --color-brand-dark: #022c22;
+  --color-brand-orange: #f97316;
+  --color-dark: #1e293b;
+  --color-light-bg: #ffffff;
+
+  /* Admin Dashboard Theme */
+  --color-brand-50: #f5f3ff;
+  --color-brand-100: #ede9fe;
+  --color-brand-500: #8b5cf6;
+  --color-brand-600: #7c3aed;
+  --color-brand-700: #6d28d9;
+  --color-brand-900: #4c1d95;
+  --color-darkbg: #0f172a;
+  --color-darkcard: #1e293b;
+
+  --font-sans: "Plus Jakarta Sans", sans-serif;
+  --font-serif: "Playfair Display", serif;
+
+  --animate-blob: blob 7s infinite;
+
+  @keyframes blob {
+    0% {
+      transform: translate(0px, 0px) scale(1);
+    }
+
+    33% {
+      transform: translate(30px, -50px) scale(1.1);
+    }
+
+    66% {
+      transform: translate(-20px, 20px) scale(0.9);
+    }
+
+    100% {
+      transform: translate(0px, 0px) scale(1);
+    }
+  }
+}
+
+/* Manual Dark Mode Toggles to ensure visibility works */
+html.dark .theme-icon-sun {
+  display: none !important;
+}
+
+html:not(.dark) .theme-icon-sun {
+  display: block !important;
+}
+
+html.dark .theme-icon-moon {
+  display: block !important;
+}
+
+html:not(.dark) .theme-icon-moon {
+  display: none !important;
+}
+
+.swiper-hero {
+  height: 100vh;
+  min-height: 600px;
+}
+
+.swiper-hero .swiper-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  animation: kenBurns 20s infinite alternate ease-in-out;
+}
+
+@keyframes kenBurns {
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(1.15);
+  }
+}
+
+.swiper-pagination-bullet {
+  width: 10px;
+  height: 10px;
+  background: white;
+  opacity: 0.5;
+  transition: all 0.3s;
+}
+
+.swiper-pagination-bullet-active {
+  width: 30px;
+  border-radius: 6px;
+  background: #f97316;
+  opacity: 1;
+}
+
+.animate-bounce-slow {
+  animation: bounce 2s infinite;
+}
+
+/* CSS Tambahan untuk Navbar Transition */
+#navbar.scrolled {
+  position: fixed;
+  background-color: rgba(255, 255, 255, 0.95);
+  /* Putih agak transparan */
+  backdrop-filter: blur(10px);
+  padding-top: 1rem;
+  /* py-4 */
+  padding-bottom: 1rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border-bottom: none;
+}
+
+/* Warna teks saat discroll */
+#navbar.scrolled .nav-text {
+  color: #1e293b;
+}
+
+/* Text Dark */
+#navbar.scrolled .nav-text:hover {
+  color: #f97316;
+}
+
+/* Hover Orange */
+#navbar.scrolled .mobile-btn {
+  color: #1e293b;
+}
+
+.swiper-hero {
+  height: 100vh;
+  min-height: 600px;
+}
+
+.ken-burns {
+  animation: kenBurns 20s infinite alternate ease-in-out;
+}
+
+@keyframes kenBurns {
+  from {
+    transform: scale(1);
+  }
+
+  to {
+    transform: scale(1.15);
+  }
+}
+
+.swiper-pagination-bullet {
+  width: 10px;
+  height: 10px;
+  background: white;
+  opacity: 0.5;
+  transition: all 0.3s;
+}
+
+.swiper-pagination-bullet-active {
+  width: 30px;
+  border-radius: 6px;
+  background: #f97316;
+  opacity: 1;
+}
+
+/* Override swiper default positioning slightly if needed, matching mockup '!bottom-24' */
+.swiper-pagination {
+  bottom: 6rem !important;
+  /* approx 24 */
+}
+
+.animate-bounce-slow {
+  animation: bounce 2s infinite;
+}
