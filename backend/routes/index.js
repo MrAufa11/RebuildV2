@@ -14,7 +14,7 @@ const articleRoutes = require('./articles');
 const galleryRoutes = require('./galleries');
 const categoryRoutes = require('./categories');
 const navbarRoutes = require('./navbars');
-const spmbRoutes = require('./registrants');
+// const spmbRoutes = require('./registrants');
 const imageRoutes = require('./images'); // Secure image serving
 
 router.get('/', (req, res) => {
@@ -35,7 +35,7 @@ router.use('/settings', settingRoutes);
 // router.use('/pages', pageRoutes);
 
 
-router.use('/spmb', spmbRoutes);
+// router.use('/spmb', spmbRoutes);
 router.use('/students', require('./students'));
 router.use('/data-leads', require('./student-users'));
 
