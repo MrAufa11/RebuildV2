@@ -98,14 +98,14 @@ jobs:
           echo "✅ SPMB frontend prepared"
           ls -la deploy/spmb/
       
-      # 9. Deploy Backend via FTP
-      - name: Deploy Backend via FTP
+      # 9. Deploy Backend via FTPS
+      - name: Deploy Backend via FTPS
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftp
+          protocol: ftps
           port: 21
           local-dir: ./deploy/api/
           server-dir: ./repositories/api-dev/
@@ -115,15 +115,16 @@ jobs:
             **/node_modules/**
             **/.env
           log-level: verbose
+          security: loose
       
-      # 10. Deploy Website Frontend via FTP
-      - name: Deploy Website Frontend via FTP
+      # 10. Deploy Website Frontend via FTPS
+      - name: Deploy Website Frontend via FTPS
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftp
+          protocol: ftps
           port: 21
           local-dir: ./deploy/website/
           server-dir: ./public_html/website-dev/
@@ -131,15 +132,16 @@ jobs:
             **/.git*
             **/node_modules/**
           log-level: verbose
+          security: loose
       
-      # 11. Deploy SPMB Frontend via FTP
-      - name: Deploy SPMB Frontend via FTP
+      # 11. Deploy SPMB Frontend via FTPS
+      - name: Deploy SPMB Frontend via FTPS
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftp
+          protocol: ftps
           port: 21
           local-dir: ./deploy/spmb/
           server-dir: ./public_html/spmb-dev/
@@ -147,6 +149,7 @@ jobs:
             **/.git*
             **/node_modules/**
           log-level: verbose
+          security: loose
       
       # 12. Deployment Complete
       - name: Deployment Summary
