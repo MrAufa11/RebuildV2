@@ -1,0 +1,164 @@
+# ============================================
+# GITHUB ACTIONS - FTP DEPLOYMENT
+# ============================================
+# Auto build and deploy to cPanel via FTP
+# No git pull needed on server!
+# ============================================
+
+name: Build and Deploy via FTP
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  build-and-ftp-deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # 1. Checkout code
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+      
+      # 2. Setup Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      # 3. Install Backend Dependencies
+      - name: Install Backend Dependencies
+        run: |
+          cd backend
+          npm ci
+          echo "✅ Backend dependencies installed"
+      
+      # 4. Build SPMB Frontend
+      - name: Build SPMB Frontend
+        run: |
+          cd spmb/frontend
+          npm ci
+          npm run build
+          echo "✅ SPMB build completed"
+          ls -la dist/
+      
+      # 5. Build Website Frontend
+      - name: Build Website Frontend
+        run: |
+          cd website/frontend
+          npm ci
+          npm run build
+          echo "✅ Website build completed"
+          ls -la dist/
+      
+      # 6. Prepare Backend for Deployment
+      - name: Prepare Backend
+        run: |
+          # Create deployment structure
+          mkdir -p deploy/api
+          
+          # Copy backend files (exclude node_modules, .env)
+          rsync -av \
+            --exclude='node_modules' \
+            --exclude='.env' \
+            --exclude='uploads' \
+            --exclude='.git' \
+            backend/ deploy/api/
+          
+          # Install production dependencies
+          cd deploy/api
+          npm ci --production
+          
+          echo "✅ Backend prepared"
+          ls -la
+      
+      # 7. Prepare Website Frontend for Deployment
+      - name: Prepare Website Frontend
+        run: |
+          mkdir -p deploy/website
+          
+          # Copy built website files
+          cp -r website/frontend/dist/* deploy/website/
+          
+          echo "✅ Website frontend prepared"
+          ls -la deploy/website/
+      
+      # 8. Prepare SPMB Frontend for Deployment
+      - name: Prepare SPMB Frontend
+        run: |
+          mkdir -p deploy/spmb
+          
+          # Copy built SPMB files
+          cp -r spmb/frontend/dist/* deploy/spmb/
+          
+          echo "✅ SPMB frontend prepared"
+          ls -la deploy/spmb/
+      
+      # 9. Deploy Backend via FTP
+      - name: Deploy Backend via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          port: 21
+          local-dir: ./deploy/api/
+          server-dir: ./repositories/api-dev/
+          exclude: |
+            **/.git*
+            **/.git/**
+            **/node_modules/**
+            **/.env
+          log-level: verbose
+      
+      # 10. Deploy Website Frontend via FTP
+      - name: Deploy Website Frontend via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          port: 21
+          local-dir: ./deploy/website/
+          server-dir: ./public_html/website-dev/
+          exclude: |
+            **/.git*
+            **/node_modules/**
+          log-level: verbose
+      
+      # 11. Deploy SPMB Frontend via FTP
+      - name: Deploy SPMB Frontend via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          port: 21
+          local-dir: ./deploy/spmb/
+          server-dir: ./public_html/spmb-dev/
+          exclude: |
+            **/.git*
+            **/node_modules/**
+          log-level: verbose
+      
+      # 12. Deployment Complete
+      - name: Deployment Summary
+        run: |
+          echo "✅ Deployment Complete!"
+          echo ""
+          echo "📦 Deployed to:"
+          echo "   - Backend API: /repositories/api-dev/"
+          echo "   - Website: /public_html/website-dev/"
+          echo "   - SPMB: /public_html/spmb-dev/"
+          echo ""
+          echo "🌐 URLs:"
+          echo "   - Website: https://almawahibbandung.sch.id/website-dev/"
+          echo "   - SPMB: https://almawahibbandung.sch.id/spmb-dev/"
+          echo "   - API: https://almawahibbandung.sch.id/api-dev/"
