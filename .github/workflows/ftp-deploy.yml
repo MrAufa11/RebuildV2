@@ -32,15 +32,15 @@ jobs:
       
       # 3. Install Backend Dependencies
       - name: Install Backend Dependencies
+        working-directory: ./backend
         run: |
-          cd backend
           npm ci
           echo "✅ Backend dependencies installed"
       
       # 4. Build SPMB Frontend
       - name: Build SPMB Frontend
+        working-directory: ./spmb/frontend
         run: |
-          cd spmb/frontend
           npm ci
           npm run build
           echo "✅ SPMB build completed"
@@ -48,8 +48,8 @@ jobs:
       
       # 5. Build Website Frontend
       - name: Build Website Frontend
+        working-directory: ./website/frontend
         run: |
-          cd website/frontend
           npm ci
           npm run build
           echo "✅ Website build completed"
