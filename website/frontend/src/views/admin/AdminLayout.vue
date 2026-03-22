@@ -2,23 +2,23 @@
     <div class="bg-[#F8F9FC] dark:bg-darkbg text-gray-800 dark:text-gray-200 h-screen w-full flex overflow-hidden transition-colors duration-300">
         
         <!-- Sidebar -->
-        <aside 
+        <aside
             :class="[
-                'bg-white dark:bg-darkcard border-r border-gray-100 dark:border-gray-700 flex flex-col z-30 flex-shrink-0 transition-all duration-300 relative',
+                'bg-white dark:bg-darkcard border-r border-gray-100 dark:border-gray-700 flex flex-col z-30 flex-shrink-0 transition-all duration-300',
                 isSidebarClosed ? 'w-20' : 'w-64'
             ]"
         >
             <div class="h-16 flex items-center px-4 border-b border-gray-100 dark:border-gray-700/50 flex-shrink-0">
                 <router-link :to="{ name: 'admin-dashboard' }" class="flex items-center gap-3 w-full overflow-hidden">
                     <template v-if="settings && settings.site_logo">
-                         <img :src="settings.site_logo" alt="Logo" class="h-8 w-auto max-w-[2rem] object-contain">
+                         <img :src="settings.site_logo + (settings.site_logo.includes('?') ? '&' : '?') + 't=' + Date.now()" alt="Logo" class="h-8 w-auto max-w-[2rem] object-contain flex-shrink-0">
                     </template>
                     <div v-else class="h-8 w-8 bg-brand-600 rounded-lg flex items-center justify-center text-white flex-shrink-0 shadow-sm shadow-brand-500/30">
                         <i class="fas fa-bolt"></i>
                     </div>
-                    <span 
-                        class="text-xl font-bold text-gray-900 dark:text-white tracking-tight whitespace-nowrap transition-opacity duration-300"
-                        :class="{ 'opacity-0 w-0 hidden': isSidebarClosed }"
+                    <span
+                        class="text-xl font-bold text-gray-900 dark:text-white tracking-tight whitespace-nowrap transition-all duration-300"
+                        :class="{ 'opacity-0 w-0 overflow-hidden': isSidebarClosed }"
                     >
                         {{ settings.site_title || 'CMS' }}
                     </span>
@@ -26,41 +26,43 @@
             </div>
     
             <div class="flex-1 overflow-y-auto py-4 px-3 space-y-1">
-                
+
                 <template v-for="menu in filteredMenus" :key="menu.id">
                     <!-- Single Menu Item -->
-                    <router-link 
+                    <router-link
                         v-if="!menu.children || menu.children.length === 0"
-                        :to="menu.url || '#'" 
-                        class="menu-link flex items-center gap-3 px-3 py-2.5 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg group transition-colors" 
-                        :class="{ 'justify-center px-0': isSidebarClosed, 'bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-300': $route.path === menu.url }"
+                        :to="menu.url || '#'"
+                        class="menu-link flex items-center gap-3 px-3 py-2.5 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg group transition-colors"
+                        :class="{ 'justify-center': isSidebarClosed, 'bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-300': $route.path === menu.url }"
+                        :title="isSidebarClosed ? menu.label : ''"
                     >
-                        <i :class="[menu.icon || 'fas fa-circle', 'w-5 text-center text-gray-400 group-hover:text-brand-600 transition-colors']"></i>
-                        <span class="font-medium text-sm whitespace-nowrap" :class="{ 'hidden': isSidebarClosed }">{{ menu.label }}</span>
+                        <i :class="[menu.icon || 'fas fa-circle', 'w-5 text-center text-gray-400 group-hover:text-brand-600 transition-colors flex-shrink-0']"></i>
+                        <span class="font-medium text-sm whitespace-nowrap transition-all duration-300" :class="{ 'opacity-0 w-0 overflow-hidden': isSidebarClosed }">{{ menu.label }}</span>
                     </router-link>
 
                     <!-- Dropdown Menu Item -->
                     <div v-else>
-                        <button 
+                        <button
                             @click="toggleMenu(menu.id)"
                             class="w-full menu-link flex items-center gap-3 px-3 py-2.5 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg group transition-colors focus:outline-none"
-                            :class="{ 'justify-center px-0': isSidebarClosed, 'bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-300': openMenus.includes(menu.id) }"
+                            :class="{ 'justify-center': isSidebarClosed, 'bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-300': openMenus.includes(menu.id) }"
+                            :title="isSidebarClosed ? menu.label : ''"
                         >
-                            <i :class="[menu.icon || 'fas fa-layer-group', 'w-5 text-center text-gray-400 group-hover:text-brand-600 transition-colors']"></i>
-                            <span class="font-medium text-sm flex-1 whitespace-nowrap text-left" :class="{ 'hidden': isSidebarClosed }">{{ menu.label }}</span>
-                            <i 
-                                class="fas fa-chevron-down text-xs transition-transform duration-200" 
+                            <i :class="[menu.icon || 'fas fa-layer-group', 'w-5 text-center text-gray-400 group-hover:text-brand-600 transition-colors flex-shrink-0']"></i>
+                            <span class="font-medium text-sm flex-1 whitespace-nowrap text-left transition-all duration-300" :class="{ 'opacity-0 w-0 overflow-hidden': isSidebarClosed }">{{ menu.label }}</span>
+                            <i
+                                class="fas fa-chevron-down text-xs transition-transform duration-200 flex-shrink-0"
                                 :class="{ 'hidden': isSidebarClosed, 'rotate-180': openMenus.includes(menu.id) }"
                             ></i>
                         </button>
-                        
+
                         <!-- Submenu Items -->
-                        <div 
+                        <div
                             v-show="openMenus.includes(menu.id) && !isSidebarClosed"
                             class="mt-1 space-y-1 pl-11 pr-2"
                           >
-                            <router-link 
-                                v-for="child in menu.children" 
+                            <router-link
+                                v-for="child in menu.children"
                                 :key="child.id"
                                 :to="child.url || '#'"
                                 class="block px-3 py-2 text-sm text-gray-500 dark:text-gray-400 hover:text-brand-600 dark:hover:text-brand-400 hover:bg-gray-50 dark:hover:bg-gray-700/30 rounded-md transition-colors"
@@ -74,20 +76,20 @@
 
             </div>
     
-            <div class="p-3 border-t border-gray-100 dark:border-gray-700/50 bg-white dark:bg-darkcard z-10">
-                
-                <button @click="logout" class="w-full menu-link flex items-center gap-3 px-3 py-2.5 text-gray-500 dark:text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg group transition-colors mb-1" title="Log out" :class="{ 'justify-center px-0': isSidebarClosed }">
-                    <i class="fas fa-sign-out-alt w-5 text-center group-hover:text-red-600 transition-colors"></i>
-                    <span class="font-medium text-sm whitespace-nowrap" :class="{ 'hidden': isSidebarClosed }">Log out</span>
+            <div class="p-3 border-t border-gray-100 dark:border-gray-700/50 bg-white dark:bg-darkcard">
+
+                <button @click="logout" class="w-full menu-link flex items-center gap-3 px-3 py-2.5 text-gray-500 dark:text-gray-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg group transition-colors mb-1" :title="isSidebarClosed ? 'Log out' : ''" :class="{ 'justify-center': isSidebarClosed }">
+                    <i class="fas fa-sign-out-alt w-5 text-center group-hover:text-red-600 transition-colors flex-shrink-0"></i>
+                    <span class="font-medium text-sm whitespace-nowrap transition-all duration-300" :class="{ 'opacity-0 w-0 overflow-hidden': isSidebarClosed }">Log out</span>
                 </button>
-    
-                <div class="h-px bg-gray-100 dark:bg-gray-700 my-2 mx-2" :class="{ 'hidden': isSidebarClosed }"></div>
-    
-                <div v-if="currentUser" class="flex items-center gap-3 px-2 py-2 transition-all duration-300 overflow-hidden cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg" :class="{ 'justify-center px-0': isSidebarClosed }">
+
+                <div class="h-px bg-gray-100 dark:bg-gray-700 my-2 mx-2" :class="{ 'invisible': isSidebarClosed }"></div>
+
+                <div v-if="currentUser" class="flex items-center gap-3 px-2 py-2 transition-all duration-300 overflow-hidden cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50 rounded-lg" :title="isSidebarClosed ? currentUser.username : ''" :class="{ 'justify-center': isSidebarClosed }">
                     <div class="h-9 w-9 rounded-full flex-shrink-0 bg-brand-100 dark:bg-brand-900/50 flex items-center justify-center text-brand-700 dark:text-brand-300 font-bold border border-gray-200 dark:border-gray-600">
                         {{ currentUser.username ? currentUser.username.substring(0, 2).toUpperCase() : '??' }}
                     </div>
-                    <div class="overflow-hidden whitespace-nowrap" :class="{ 'hidden': isSidebarClosed }">
+                    <div class="whitespace-nowrap transition-all duration-300" :class="{ 'opacity-0 w-0 overflow-hidden': isSidebarClosed }">
                         <p class="text-sm font-semibold text-gray-900 dark:text-white leading-none">{{ currentUser.username }}</p>
                         <p class="text-xs text-gray-500 truncate mt-1">{{ currentUser.email }}</p>
                     </div>
@@ -132,12 +134,11 @@ import Alert from '../../assets/alert';
 import { useSettings } from '../../composables/useSettings';
 
 const router = useRouter();
-const isSidebarClosed = ref(false);
+const isSidebarClosed = ref(false); // Start open by default
 const menus = ref([]);
 const openMenus = ref([]);
 const currentUser = ref(null);
 const { settings } = useSettings();
-
 
 const toggleSidebar = () => {
     isSidebarClosed.value = !isSidebarClosed.value;
@@ -251,7 +252,7 @@ const toggleTheme = () => {
 
 onMounted(async () => {
     await initialize();
-    
+
     // Check initial theme
     if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         document.documentElement.classList.add('dark');

@@ -2,9 +2,9 @@
     <div class="bg-[#F8F9FC] dark:bg-darkbg text-gray-800 dark:text-gray-200 h-screen w-full flex overflow-hidden transition-colors duration-300">
         
         <!-- Sidebar -->
-        <aside 
+        <aside
             :class="[
-                'bg-white dark:bg-darkcard border-r border-gray-100 dark:border-gray-700 flex flex-col z-30 flex-shrink-0 transition-all duration-300 relative',
+                'bg-white dark:bg-darkcard border-r border-gray-100 dark:border-gray-700 flex flex-col z-30 flex-shrink-0 transition-all duration-300',
                 isSidebarClosed ? 'w-20' : 'w-64'
             ]"
         >
@@ -13,11 +13,11 @@
                     <div class="h-8 w-8 bg-brand-600 rounded-lg flex items-center justify-center text-white flex-shrink-0 shadow-sm shadow-brand-500/30">
                         <i class="fas fa-bolt"></i>
                     </div>
-                    <span 
-                        class="text-xl font-bold text-gray-900 dark:text-white tracking-tight whitespace-nowrap transition-opacity duration-300"
-                        :class="{ 'opacity-0 w-0 hidden': isSidebarClosed }"
+                    <span
+                        class="text-xl font-bold text-gray-900 dark:text-white tracking-tight whitespace-nowrap transition-all duration-300"
+                        :class="{ 'opacity-0 w-0 overflow-hidden': isSidebarClosed }"
                     >
-                        CMS 
+                        CMS
                     </span>
                 </a>
             </div>
@@ -128,7 +128,7 @@ import api from '../../services/api';
 import Alert from '../../assets/alert';
 
 const router = useRouter();
-const isSidebarClosed = ref(false);
+const isSidebarClosed = ref(false); // Start open by default
 const menus = ref([]);
 const openMenus = ref([]);
 const currentUser = ref(null);
@@ -241,7 +241,7 @@ const toggleTheme = () => {
 
 onMounted(async () => {
     await initialize();
-    
+
     // Check initial theme
     if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
         document.documentElement.classList.add('dark');

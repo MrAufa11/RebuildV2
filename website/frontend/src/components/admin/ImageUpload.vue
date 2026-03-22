@@ -17,9 +17,9 @@
             >
             
             <div v-if="previewUrl || modelValue" class="relative group w-full flex justify-center">
-                 <img 
-                    :src="previewUrl || modelValue" 
-                    alt="Preview" 
+                 <img
+                    :src="previewUrl || (modelValue ? modelValue + (modelValue.includes('?') ? '&' : '?') + 't=' + Date.now() : '')"
+                    alt="Preview"
                     class="max-h-64 object-contain rounded-lg shadow-sm"
                 >
                 <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-lg">

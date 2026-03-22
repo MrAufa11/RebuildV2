@@ -4,12 +4,12 @@
       
       <router-link to="/" class="flex items-center gap-3 transition-colors duration-300" :class="(isScrolled || !isHome) ? 'text-dark' : 'text-white'">
         <template v-if="settings && settings.site_logo">
-            <img :src="settings.site_logo" alt="Logo" class="h-10 w-auto object-contain">
+            <img :src="settings.site_logo + (settings.site_logo.includes('?') ? '&' : '?') + 't=' + Date.now()" alt="Logo" class="h-10 w-auto object-contain">
         </template>
         <div v-else class="w-10 h-10 bg-brand-orange rounded-xl flex items-center justify-center text-white text-xl shadow-lg shadow-orange-500/30 backdrop-blur-sm">
           <i class="fas fa-book-open"></i>
         </div>
-        
+
         <span v-if="settings && settings.site_title" class="font-bold text-xl tracking-wide font-serif drop-shadow-md">{{ settings.site_title }}</span>
         <span v-else class="font-bold text-xl tracking-wide font-serif drop-shadow-md">Al-Mawahib<span class="text-brand-orange">.sch</span></span>
       </router-link>
@@ -69,10 +69,144 @@
         PPDB Online
       </a>
       
-      <button class="md:hidden mobile-btn text-2xl transition-colors duration-300" :class="(isScrolled || !isHome) ? 'text-dark' : 'text-white'">
-          <i class="fas fa-bars"></i>
+      <button @click="toggleMobileMenu" class="md:hidden mobile-btn text-2xl transition-colors duration-300 focus:outline-none" :class="(isScrolled || !isHome) ? 'text-dark' : 'text-white'">
+          <i :class="isMobileMenuOpen ? 'fas fa-times' : 'fas fa-bars'"></i>
       </button>
     </div>
+
+    <!-- Mobile Menu -->
+    <transition
+      enter-active-class="transition duration-300 ease-out"
+      enter-from-class="opacity-0 -translate-y-4"
+      enter-to-class="opacity-100 translate-y-0"
+      leave-active-class="transition duration-200 ease-in"
+      leave-from-class="opacity-100 translate-y-0"
+      leave-to-class="opacity-0 -translate-y-4"
+    >
+      <div v-if="isMobileMenuOpen" class="md:hidden mobile-menu bg-white border-t border-gray-100 shadow-2xl">
+        <div class="px-6 py-4 space-y-1 max-h-[75vh] overflow-y-auto">
+          <!-- Menu Header -->
+          <div class="flex items-center justify-between pb-4 mb-4 border-b border-gray-100">
+            <span class="text-sm font-semibold text-gray-500 uppercase tracking-wider">Menu</span>
+            <button @click="closeMobileMenu" class="p-2 rounded-full hover:bg-gray-100 transition-colors">
+              <i class="fas fa-times text-gray-500"></i>
+            </button>
+          </div>
+          
+          <template v-for="menu in menus" :key="menu.id">
+            <!-- Simple Link -->
+            <div v-if="!menu.children || menu.children.length === 0">
+              <router-link 
+                v-if="isHome && menu.url.startsWith('#')"
+                :to="menu.url" 
+                class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-brand-50 hover:text-brand-orange transition-all duration-200"
+                @click="closeMobileMenu"
+              >
+                <i class="fas fa-chevron-right text-xs opacity-50"></i>
+                <span class="font-medium">{{ menu.label }}</span>
+              </router-link>
+              <router-link 
+                v-else-if="!menu.url.startsWith('http')"
+                :to="menu.url" 
+                class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-brand-50 hover:text-brand-orange transition-all duration-200"
+                @click="closeMobileMenu"
+              >
+                <i class="fas fa-chevron-right text-xs opacity-50"></i>
+                <span class="font-medium">{{ menu.label }}</span>
+              </router-link>
+              <a 
+                v-else 
+                :href="menu.url" 
+                target="_blank"
+                class="flex items-center gap-3 px-4 py-3 rounded-xl text-gray-700 hover:bg-brand-50 hover:text-brand-orange transition-all duration-200"
+              >
+                <i class="fas fa-external-link-alt text-xs opacity-50"></i>
+                <span class="font-medium">{{ menu.label }}</span>
+              </a>
+            </div>
+            
+            <!-- Dropdown Menu (Collapsible on Mobile) -->
+            <div v-else class="mb-2">
+              <button 
+                @click="toggleDropdown(menu.id)"
+                class="w-full flex justify-between items-center px-4 py-3 rounded-xl text-gray-700 hover:bg-brand-50 hover:text-brand-orange transition-all duration-200"
+              >
+                <div class="flex items-center gap-3">
+                  <i class="fas fa-folder text-xs opacity-50"></i>
+                  <span class="font-medium">{{ menu.label }}</span>
+                </div>
+                <i :class="openDropdown === menu.id ? 'fas fa-chevron-up rotate-180' : 'fas fa-chevron-down'" class="text-xs transition-transform duration-300"></i>
+              </button>
+              <transition
+                enter-active-class="transition duration-300 ease-out"
+                enter-from-class="opacity-0 max-h-0"
+                enter-to-class="opacity-100 max-h-96"
+                leave-active-class="transition duration-200 ease-in"
+                leave-from-class="opacity-100 max-h-96"
+                leave-to-class="opacity-0 max-h-0"
+              >
+                <div v-show="openDropdown === menu.id" class="pl-4 ml-4 mt-2 space-y-1 border-l-2 border-brand-orange/20">
+                  <template v-for="child in menu.children" :key="child.id">
+                    <!-- Nested Dropdown -->
+                    <div v-if="child.children && child.children.length > 0" class="mb-1">
+                      <button 
+                        @click="toggleSubDropdown(child.id)"
+                        class="w-full flex justify-between items-center px-4 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-brand-50 hover:text-brand-orange transition-all duration-200"
+                      >
+                        <div class="flex items-center gap-2">
+                          <i class="fas fa-folder-open text-xs opacity-40"></i>
+                          <span>{{ child.label }}</span>
+                        </div>
+                        <i :class="openSubDropdown === child.id ? 'fas fa-chevron-up rotate-180' : 'fas fa-chevron-right'" class="text-xs transition-transform duration-300"></i>
+                      </button>
+                      <transition
+                        enter-active-class="transition duration-300 ease-out"
+                        enter-from-class="opacity-0 max-h-0"
+                        enter-to-class="opacity-100 max-h-96"
+                        leave-active-class="transition duration-200 ease-in"
+                        leave-from-class="opacity-100 max-h-96"
+                        leave-to-class="opacity-0 max-h-0"
+                      >
+                        <div v-show="openSubDropdown === child.id" class="pl-4 ml-3 mt-1 space-y-1 border-l-2 border-brand-orange/10">
+                          <router-link 
+                            v-for="grand in child.children" 
+                            :key="grand.id"
+                            :to="grand.url"
+                            class="flex items-center gap-2 px-4 py-2 rounded-md text-sm text-gray-600 hover:bg-brand-50 hover:text-brand-orange transition-all duration-200"
+                            @click="closeMobileMenu"
+                          >
+                            <i class="fas fa-file text-xs opacity-30"></i>
+                            <span>{{ grand.label }}</span>
+                          </router-link>
+                        </div>
+                      </transition>
+                    </div>
+                    <!-- Simple Child Link -->
+                    <router-link 
+                      v-else
+                      :to="child.url"
+                      class="flex items-center gap-2 px-4 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-brand-50 hover:text-brand-orange transition-all duration-200"
+                      @click="closeMobileMenu"
+                    >
+                      <i class="fas fa-file text-xs opacity-30"></i>
+                      <span>{{ child.label }}</span>
+                    </router-link>
+                  </template>
+                </div>
+              </transition>
+            </div>
+          </template>
+          
+          <!-- CTA Button -->
+          <div class="pt-4 mt-4 border-t border-gray-100">
+            <a href="#" class="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-brand-orange to-brand-orange/90 text-white px-6 py-4 rounded-xl font-bold text-sm hover:from-brand-orange hover:to-brand-orange transition-all duration-300 shadow-lg shadow-orange-500/30 transform hover:-translate-y-0.5">
+              <i class="fas fa-user-plus"></i>
+              <span>PPDB Online</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </transition>
   </nav>
 </template>
 
@@ -87,8 +221,39 @@ const route = useRoute();
 const isScrolled = ref(false);
 const menus = ref([]);
 
+// Mobile menu state
+const isMobileMenuOpen = ref(false);
+const openDropdown = ref(null);
+const openSubDropdown = ref(null);
+
 // Check if we are on the home page
 const isHome = computed(() => route.path === '/');
+
+const toggleMobileMenu = () => {
+  isMobileMenuOpen.value = !isMobileMenuOpen.value;
+  if (isMobileMenuOpen.value) {
+    document.body.style.overflow = 'hidden'; // Prevent scrolling when menu is open
+  } else {
+    document.body.style.overflow = '';
+    openDropdown.value = null;
+    openSubDropdown.value = null;
+  }
+};
+
+const closeMobileMenu = () => {
+  isMobileMenuOpen.value = false;
+  document.body.style.overflow = '';
+  openDropdown.value = null;
+  openSubDropdown.value = null;
+};
+
+const toggleDropdown = (menuId) => {
+  openDropdown.value = openDropdown.value === menuId ? null : menuId;
+};
+
+const toggleSubDropdown = (childId) => {
+  openSubDropdown.value = openSubDropdown.value === childId ? null : childId;
+};
 
 const fetchMenus = async () => {
     try {

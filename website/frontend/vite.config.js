@@ -6,7 +6,7 @@ export default defineConfig({
   plugins: [vue()],
   base: '/',
   server: {
-    port: 3000,
+    port: 5173,
     host: '0.0.0.0',
     proxy: {
       '/api': {
@@ -17,6 +17,10 @@ export default defineConfig({
         target: process.env.VITE_PROXY_TARGET || 'http://localhost:3000',
         changeOrigin: true,
       },
+      '/uploads': {
+        target: process.env.VITE_PROXY_TARGET || 'http://localhost:3000',
+        changeOrigin: true,
+      }
     },
   },
 })
