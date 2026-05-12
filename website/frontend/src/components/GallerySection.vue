@@ -57,7 +57,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import api from '../services/api';
+import api from '../services/websiteApi';
 import { useImageUrl } from '../composables/useImageUrl';
 
 const galleries = ref([]);
@@ -89,7 +89,7 @@ const closePreview = () => {
 
 const fetchGalleries = async () => {
     try {
-        const response = await api.get('/public/galleries');
+        const response = await api.get('/galleries');
         if (response.data && response.data.length > 0) {
             galleries.value = response.data;
         }

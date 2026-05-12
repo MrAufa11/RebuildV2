@@ -42,7 +42,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import api from '../../services/api';
+import api from '../../services/websiteApi';
 
 const route = useRoute();
 const article = ref(null);
@@ -51,7 +51,7 @@ const loading = ref(true);
 const fetchArticle = async () => {
     try {
         const slug = route.params.slug;
-        const response = await api.get(`/public/articles/${slug}`);
+        const response = await api.get(`/articles/${slug}`);
         article.value = response.data;
     } catch (error) {
         console.error('Error fetching article:', error);

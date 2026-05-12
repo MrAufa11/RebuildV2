@@ -28,7 +28,7 @@
 <script setup>
 import { ref, onMounted, watch } from 'vue';
 import { useRoute } from 'vue-router';
-import api from '../../services/api';
+import api from '../../services/websiteApi';
 
 const route = useRoute();
 const page = ref(null);

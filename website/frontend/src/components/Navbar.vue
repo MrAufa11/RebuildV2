@@ -213,7 +213,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
-import api from '../services/api';
+import api from '../services/websiteApi';
 import { useSettings } from '../composables/useSettings';
 
 const { settings } = useSettings();
@@ -257,7 +257,7 @@ const toggleSubDropdown = (childId) => {
 
 const fetchMenus = async () => {
     try {
-        const response = await api.get('/public/menus');
+        const response = await api.get('/menus');
         menus.value = response.data;
     } catch (error) {
         console.error('Failed to fetch menus:', error);

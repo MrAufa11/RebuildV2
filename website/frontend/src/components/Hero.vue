@@ -57,7 +57,7 @@
 import { ref, onMounted, nextTick } from 'vue';
 import Swiper from 'swiper/bundle';
 import 'swiper/css/bundle';
-import api from '../services/api';
+import api from '../services/websiteApi';
 import { useImageUrl } from '../composables/useImageUrl';
 
 const banners = ref([]);
@@ -65,7 +65,7 @@ const loading = ref(true);
 
 const fetchBanners = async () => {
     try {
-        const response = await api.get('/public/banners');
+        const response = await api.get('/banners');
         banners.value = response.data;
     } catch (error) {
         console.error('Error fetching banners:', error);

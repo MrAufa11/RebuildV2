@@ -41,7 +41,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import api from '../services/api';
+import api from '../services/websiteApi';
 
 const settings = ref({});
 const defaultTitle = 'Membangun Fondasi <br><span class="text-transparent bg-clip-text bg-gradient-to-r from-brand-orange to-yellow-500">Karakter Qur\'ani</span> di Era Digital';
@@ -56,7 +56,7 @@ const formattedTitle = computed(() => {
 
 const fetchSettings = async () => {
     try {
-        const response = await api.get('/public/settings');
+        const response = await api.get('/settings');
         settings.value = response.data;
     } catch (error) {
         console.error('Error fetching settings:', error);

@@ -4,7 +4,18 @@ const { Model } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
     class StudentUser extends Model {
         static associate(models) {
-            StudentUser.hasMany(models.SpmbToken, { foreignKey: 'student_id', as: 'tokens' });
+            if (models && models.SpmbToken) {
+                StudentUser.hasMany(models.SpmbToken, { foreignKey: 'student_id', as: 'tokens' });
+            }
+            // Registrant model may not be present in every deployment - guard the association
+            if (models && models.Registrant) {
+                StudentUser.hasOne(models.Registrant, { 
+                    foreignKey: 'student_user_id', 
+                    sourceKey: 'id', 
+                    as: 'registrant',
+                    onDelete: 'SET NULL'
+                });
+            }
         }
     }
     StudentUser.init({
@@ -30,6 +41,7 @@ module.exports = (sequelize, DataTypes) => {
     }, {
         sequelize,
         modelName: 'StudentUser',
+        tableName: 'StudentUsers',
     });
     return StudentUser;
 };

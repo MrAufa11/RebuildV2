@@ -55,7 +55,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import api from '../../services/api';
+import api from '../../services/websiteApi';
 
 const teachers = ref([]);
 const loading = ref(true);
@@ -63,7 +63,7 @@ const searchQuery = ref('');
 
 const fetchTeachers = async () => {
     try {
-        const response = await api.get('/public/teachers');
+        const response = await api.get('/teachers');
         teachers.value = response.data;
     } catch (error) {
         console.error('Error fetching teachers:', error);

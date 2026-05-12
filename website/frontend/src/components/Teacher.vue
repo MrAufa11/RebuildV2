@@ -28,7 +28,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import api from '../services/api';
+import api from '../services/websiteApi';
 import { useImageUrl } from '../composables/useImageUrl';
 
 const teachers = ref([]);
@@ -46,7 +46,7 @@ const displayTeachers = computed(() => {
 
 const fetchTeachers = async () => {
     try {
-        const response = await api.get('/public/teachers');
+        const response = await api.get('/teachers');
         if (response.data && response.data.length > 0) {
             teachers.value = response.data;
         }

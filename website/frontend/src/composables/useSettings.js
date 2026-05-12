@@ -1,5 +1,5 @@
 import { reactive, toRefs } from 'vue';
-import api from '../services/api';
+import api from '../services/websiteApi';
 
 // Create a reactive state outside the function to share state across components
 const state = reactive({
@@ -17,7 +17,7 @@ export function useSettings() {
         state.loading = true;
         try {
             // Fetch from public settings endpoint
-            const response = await api.get('/public/settings');
+            const response = await api.get('/settings');
             state.settings = response.data;
             state.fetched = true;
         } catch (error) {

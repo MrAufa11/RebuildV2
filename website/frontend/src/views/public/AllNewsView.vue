@@ -88,7 +88,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import api from '../../services/api';
+import api from '../../services/websiteApi';
 
 const articles = ref([]);
 const categories = ref([]); // To store unique categories
@@ -102,7 +102,7 @@ const filters = ref({
 
 const fetchArticles = async () => {
     try {
-        const response = await api.get('/public/articles');
+        const response = await api.get('/articles');
         articles.value = response.data;
         
         // Extract unique categories from articles for the filter

@@ -83,7 +83,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import api from '../../services/api';
+import api from '../../services/websiteApi';
 
 const galleries = ref([]);
 const categories = ref([]);
@@ -110,7 +110,7 @@ const fetchCategories = async () => {
 
 const fetchGalleries = async () => {
     try {
-        const response = await api.get('/public/galleries');
+        const response = await api.get('/galleries');
         galleries.value = response.data;
     } catch (error) {
         console.error('Failed to fetch galleries:', error);

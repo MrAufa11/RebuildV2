@@ -3,9 +3,8 @@
 const fs = require('fs');
 const path = require('path');
 const Sequelize = require('sequelize');
-const process = require('process');
-const env = process.env.NODE_ENV || 'development';
 const config = require(__dirname + '/../config/database.js');
+
 const db = {};
 
 // Create distinct Sequelize instances for each database
@@ -50,7 +49,7 @@ Object.keys(db).forEach(modelName => {
 });
 
 // Attach sequelize instances to db object
-db.sequelize = databases.master; // Default/Main instance (for backward compatibility if needed)
+db.sequelize = databases.master;
 db.Sequelize = Sequelize;
 
 // Export all instances for specific usage

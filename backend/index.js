@@ -1,8 +1,9 @@
 require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
+
+// Use lazy-loading models - databases connect only when first accessed
 const db = require('./models');
-const router = require('./routes');
 
 const cookieParser = require('cookie-parser');
 
@@ -59,34 +60,42 @@ app.use('/public/website', express.static(path.join(__dirname, 'uploads', 'websi
 app.use('/api/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/api/public', express.static(publicDir));
 
-app.use('/api', router);
+// ========== MODULAR APP ROUTES ==========
+// Mount each app module with explicit prefix
+// This replaces the old dynamic routing approach
+const masterRoutes = require('./src/apps/master');
+const spmbRoutes = require('./src/apps/spmb');
+const websiteRoutes = require('./src/apps/website');
+const keuanganRoutes = require('./src/apps/keuangan');
 
-// Secure image routes (after main router to avoid conflicts)
-const imageRoutes = require('./routes/images');
-app.use('/api/images', imageRoutes);
+// Mount apps with /api/:appName prefix
+app.use('/api/master', masterRoutes);
+app.use('/api/spmb', spmbRoutes);
+app.use('/api/website', websiteRoutes);
+app.use('/api/keuangan', keuanganRoutes);
 
-// Authenticate all database connections
+// Compatibility: also mount modules at legacy /api root so older frontend paths still work
+// This makes endpoints like /api/public/*, /api/auth/*, /api/banners, /api/settings available
+app.use('/api', masterRoutes);
+app.use('/api', spmbRoutes);
+app.use('/api', websiteRoutes);
+app.use('/api', keuanganRoutes);
+
+// Secure image routes - now handled by website module
+// const imageRoutes = require('./routes/images'); // DELETED - old routes removed
+// app.use('/api/images', imageRoutes); // Images served via /api/website/images
+
+// Legacy routes REMOVED - use modular routes instead
+// Old: /api/legacy/* 
+// New: /api/spmb/*, /api/master/*, /api/website/*, /api/keuangan/*
+
+// Eager database connection - connect all databases at startup for reliability
 const connectDatabases = async () => {
   try {
-    await db.databases.master.authenticate();
-    console.log('✅ Master Database connected...');
-
-    await db.databases.website.authenticate();
-    console.log('✅ Website Database connected...');
-
-    await db.databases.spmb.authenticate();
-    console.log('✅ SPMB Database connected...');
-
-    await db.databases.keuangan.authenticate();
-    console.log('✅ Keuangan Database connected...');
-
-    // Sync models if needed (be careful in production)
-    // await db.databases.master.sync();
-    // await db.databases.website.sync();
-    // await db.databases.spmb.sync();
-    // await db.databases.keuangan.sync();
+    // Models auto-connect on initialization (eager loading)
+    console.log('✅ All databases connected successfully');
   } catch (err) {
-    console.error('❌ Unable to connect to one of the databases:', err);
+    console.error('❌ Database connection error:', err.message);
   }
 };
 

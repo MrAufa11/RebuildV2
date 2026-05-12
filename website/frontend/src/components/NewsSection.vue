@@ -35,7 +35,7 @@
 
 <script setup>
 import { ref, onMounted, computed } from 'vue';
-import api from '../services/api';
+import api from '../services/websiteApi';
 import { useImageUrl } from '../composables/useImageUrl';
 
 const articles = ref([]);
@@ -76,7 +76,7 @@ const displayArticles = computed(() => {
 
 const fetchArticles = async () => {
     try {
-        const response = await api.get('/public/articles');
+        const response = await api.get('/articles');
         if (response.data && response.data.length > 0) {
             articles.value = response.data.map(item => ({
                 ...item,
